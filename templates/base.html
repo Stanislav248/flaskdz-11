@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Заходи{% endblock %} · EventHub</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav class="top">
+  <div class="container">
+    <a class="brand" href="{{ url_for('events.event_list') }}">🎟 EventHub</a>
+    <a href="{{ url_for('events.event_list') }}">Заходи</a>
+    {% if current_user.is_authenticated %}
+      {% if current_user.is_organizer %}<a href="{{ url_for('manage.my_events') }}">Керування заходами</a>{% endif %}
+      {% if current_user.is_moderator %}
+        <a href="{{ url_for('moderator.users') }}">Користувачі</a>
+        <a href="{{ url_for('moderator.categories') }}">Категорії</a>
+      {% endif %}
+      <span class="spacer"></span>
+      <a href="{{ url_for('profile.view') }}">👤 {{ current_user.username }}</a>
+      <span class="badge">{{ current_user.role_label }}</span>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn secondary sm">Вийти</button>
+      </form>
+    {% else %}
+      <span class="spacer"></span>
+      <a href="{{ url_for('auth.login') }}">Вхід</a>
+      <a class="btn sm" href="{{ url_for('auth.register') }}">Реєстрація</a>
+    {% endif %}
+  </div>
+</nav>
+<main>
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+</body>
+</html>

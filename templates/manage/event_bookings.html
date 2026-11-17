@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Бронювання{% endblock %}
+{% block content %}
+<div class="toolbar"><h1>Бронювання: {{ event.title }}</h1><a class="btn secondary" href="{{ url_for('manage.my_events') }}">Назад</a></div>
+<p class="meta">Активних бронювань: {{ event.active_bookings_count }} з {{ event.capacity }}</p>
+{% if event.bookings %}
+<div class="table-wrap"><table>
+  <tr><th>Користувач</th><th>Email</th><th>Телефон</th><th>Дата бронювання</th><th>Статус</th></tr>
+  {% for b in event.bookings %}
+  <tr><td>{{ b.user.full_name or b.user.username }}</td><td>{{ b.user.email }}</td><td>{{ b.user.phone or '—' }}</td>
+      <td>{{ b.created_at|dt }}</td><td><span class="badge {{ b.display_status }}">{{ b.display_label }}</span></td></tr>
+  {% endfor %}
+</table></div>
+{% else %}<div class="empty">Бронювань ще немає.</div>{% endif %}
+{% endblock %}

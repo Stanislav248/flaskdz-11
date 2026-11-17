@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Категорії{% endblock %}
+{% block content %}
+<h1>Категорії заходів</h1>
+<div class="card form-wide" style="margin-bottom:20px">
+  <form method="post" class="actions" style="align-items:center">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="name" placeholder="Нова категорія" style="flex:1" required>
+    <button class="btn">Додати</button>
+  </form>
+</div>
+<div class="table-wrap"><table>
+  <tr><th>Назва</th><th>Заходів</th><th></th></tr>
+  {% for c in categories %}
+  <tr><td>{{ c.name }}</td><td>{{ c.events|length }}</td>
+    <td><form class="inline" method="post" action="{{ url_for('moderator.delete_category', category_id=c.id) }}" onsubmit="return confirm('Видалити категорію?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn danger sm">Видалити</button></form></td></tr>
+  {% endfor %}
+</table></div>
+{% endblock %}

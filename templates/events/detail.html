@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block content %}
+<div class="card">
+  <span class="badge {{ event.state }}">{{ event.state_label }}</span>
+  {% if event.category %}<span class="badge">{{ event.category.name }}</span>{% endif %}
+  <h1 style="margin-top:10px">{{ event.title }}</h1>
+  <p class="meta">
+    📅 {{ event.start_time|dt }} — {{ event.end_time|dt }}<br>
+    📍 {{ event.location or '—' }}<br>
+    🧑‍💼 Організатор: {{ event.organizer.full_name or event.organizer.username }}<br>
+    👥 Заброньовано: {{ event.active_bookings_count }} / {{ event.capacity }} (вільних: {{ event.seats_left }})
+  </p>
+  <p class="price" style="font-size:1.3rem">{{ event.price|money }}</p>
+  <p style="white-space:pre-line">{{ event.description }}</p>
+  <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+  {% if not current_user.is_authenticated %}
+    <p><a class="btn" href="{{ url_for('auth.login', next=request.path) }}">Увійдіть, щоб забронювати</a></p>
+  {% else %}
+    {% if booking and booking.status == 'active' %}
+      <div class="flash success">Ви забронювали цей захід ({{ booking.created_at|dt }}).</div>
+      {% if event.state == 'upcoming' %}
+      <form class="inline" method="post" action="{{ url_for('events.cancel', booking_id=booking.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ url_for('events.event_detail', event_id=event.id) }}">
+        <button class="btn danger">Скасувати бронювання</button>
+      </form>
+      {% endif %}
+    {% elif block_reason %}
+      <div class="flash warning">{{ block_reason }}</div>
+      <button class="btn" disabled>Забронювати</button>
+    {% else %}
+      <form method="post" action="{{ url_for('events.book', event_id=event.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn">Забронювати</button>
+      </form>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

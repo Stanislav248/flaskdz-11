@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Керування заходами{% endblock %}
+{% block content %}
+<div class="toolbar"><h1>{{ 'Усі заходи' if current_user.is_moderator else 'Мої заходи' }}</h1>
+  <a class="btn" href="{{ url_for('manage.create') }}">+ Створити захід</a></div>
+{% if events %}
+<div class="table-wrap"><table>
+  <tr><th>Назва</th>{% if current_user.is_moderator %}<th>Організатор</th>{% endif %}<th>Дата</th><th>Статус</th><th>Місця</th><th>Дії</th></tr>
+  {% for e in events %}
+  <tr>
+    <td><a href="{{ url_for('events.event_detail', event_id=e.id) }}">{{ e.title }}</a></td>
+    {% if current_user.is_moderator %}<td>{{ e.organizer.username }}</td>{% endif %}
+    <td>{{ e.start_time|dt }}</td>
+    <td><span class="badge {{ e.state }}">{{ e.state_label }}</span></td>
+    <td>{{ e.active_bookings_count }} / {{ e.capacity }}</td>
+    <td><div class="actions">
+      <a class="btn secondary sm" href="{{ url_for('manage.edit', event_id=e.id) }}">Редагувати</a>
+      <a class="btn secondary sm" href="{{ url_for('manage.bookings', event_id=e.id) }}">Бронювання</a>
+      {% if e.status == 'draft' %}
+        <form class="inline" method="post" action="{{ url_for('manage.publish', event_id=e.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn sm">Опублікувати</button></form>
+      {% elif e.status == 'published' %}
+        <form class="inline" method="post" action="{{ url_for('manage.unpublish', event_id=e.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn secondary sm">Зняти з публікації</button></form>
+        <form class="inline" method="post" action="{{ url_for('manage.cancel', event_id=e.id) }}" onsubmit="return confirm('Скасувати захід?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn secondary sm">Скасувати</button></form>
+      {% endif %}
+      <form class="inline" method="post" action="{{ url_for('manage.delete', event_id=e.id) }}" onsubmit="return confirm('Видалити захід разом з усіма бронюваннями?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn danger sm">Видалити</button></form>
+    </div></td>
+  </tr>
+  {% endfor %}
+</table></div>
+{% else %}<div class="empty">Заходів ще немає.</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Заходи{% endblock %}
+{% block content %}
+<h1>Заходи</h1>
+<form class="card filters" method="get" action="{{ url_for('events.event_list') }}">
+  <div><label>Пошук</label><input name="q" value="{{ args.get('q','') }}" placeholder="Назва, місце..."></div>
+  <div><label>Категорія</label>
+    <select name="category"><option value="">Усі</option>
+      {% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if args.get('category')|string == c.id|string }}>{{ c.name }}</option>{% endfor %}
+    </select></div>
+  <div><label>Дата від</label><input type="date" name="date_from" value="{{ args.get('date_from','') }}"></div>
+  <div><label>Дата до</label><input type="date" name="date_to" value="{{ args.get('date_to','') }}"></div>
+  <div><label>Ціна від</label><input type="number" min="0" step="any" name="price_min" value="{{ args.get('price_min','') }}"></div>
+  <div><label>Ціна до</label><input type="number" min="0" step="any" name="price_max" value="{{ args.get('price_max','') }}"></div>
+  <div><label>Сортування</label>
+    <select name="sort">{% for k, v in sorts.items() %}<option value="{{ k }}" {{ 'selected' if args.get('sort','date')==k }}>{{ v }}</option>{% endfor %}</select></div>
+  <div><label class="checkbox"><input type="checkbox" name="show_past" value="1" {{ 'checked' if args.get('show_past') }}> Показати минулі</label></div>
+  <div class="actions"><button class="btn">Застосувати</button><a class="btn secondary" href="{{ url_for('events.event_list') }}">Скинути</a></div>
+</form>
+
+{% if pagination.items %}
+<div class="grid">
+  {% for e in pagination.items %}
+  <div class="card event-card">
+    <div><span class="badge {{ e.state }}">{{ e.state_label }}</span>
+      {% if e.category %}<span class="badge">{{ e.category.name }}</span>{% endif %}</div>
+    <h3><a href="{{ url_for('events.event_detail', event_id=e.id) }}">{{ e.title }}</a></h3>
+    <div class="meta">📅 {{ e.start_time|dt }}<br>📍 {{ e.location or '—' }}</div>
+    <div class="meta">👥 Заброньовано: {{ e.active_bookings_count }} / {{ e.capacity }}</div>
+    <div class="price">{{ e.price|money }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% if pagination.pages > 1 %}
+<div class="pager">
+  {% for p in range(1, pagination.pages + 1) %}
+    {% if p == pagination.page %}<span class="on">{{ p }}</span>
+    {% else %}<a href="{{ url_for('events.event_list', page=p, **args) }}">{{ p }}</a>{% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+{% else %}
+<div class="empty">Заходів за вашими критеріями не знайдено.</div>
+{% endif %}
+{% endblock %}

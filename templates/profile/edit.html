@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Редагування профілю{% endblock %}
+{% block content %}
+<div class="card form-wide">
+  <h1>Редагування профілю</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row">
+      <div><label>Ім'я користувача</label><input name="username" value="{{ form.get('username','') }}" required></div>
+      <div><label>Email</label><input type="email" name="email" value="{{ form.get('email','') }}" required></div>
+    </div>
+    <div class="row">
+      <div><label>Повне ім'я</label><input name="full_name" value="{{ form.get('full_name','') }}"></div>
+      <div><label>Телефон</label><input name="phone" value="{{ form.get('phone','') }}"></div>
+    </div>
+    <label>Про себе</label><textarea name="bio">{{ form.get('bio','') }}</textarea>
+    <h2>Зміна пароля <span class="meta">(необов'язково)</span></h2>
+    <label>Поточний пароль</label><input type="password" name="current_password">
+    <div class="row">
+      <div><label>Новий пароль</label><input type="password" name="new_password"></div>
+      <div><label>Повторіть новий пароль</label><input type="password" name="new_password2"></div>
+    </div>
+    <p class="actions"><button class="btn">Зберегти</button><a class="btn secondary" href="{{ url_for('profile.view') }}">Скасувати</a></p>
+  </form>
+</div>
+{% endblock %}

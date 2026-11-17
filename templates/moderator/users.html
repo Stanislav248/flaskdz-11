@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Користувачі{% endblock %}
+{% block content %}
+<h1>Керування користувачами</h1>
+<div class="stats">
+  <div class="card"><b>{{ stats.users }}</b>користувачів</div>
+  <div class="card"><b>{{ stats.events }}</b>заходів</div>
+  <div class="card"><b>{{ stats.bookings }}</b>активних бронювань</div>
+</div>
+<div class="table-wrap"><table>
+  <tr><th>ID</th><th>Користувач</th><th>Email</th><th>Роль</th><th>Акаунт</th><th></th></tr>
+  {% for u in users %}
+  <tr>
+    <td>{{ u.id }}</td><td>{{ u.username }}</td><td>{{ u.email }}</td>
+    <td>
+      {% if u.id == current_user.id %}<span class="badge">{{ u.role_label }}</span>
+      {% else %}
+      <form class="inline" method="post" action="{{ url_for('moderator.set_role', user_id=u.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <select name="role" style="width:auto" onchange="this.form.submit()">
+          {% for r in roles %}<option value="{{ r }}" {{ 'selected' if u.role == r }}>{{ role_labels[r] }}</option>{% endfor %}
+        </select>
+      </form>
+      {% endif %}
+    </td>
+    <td><span class="badge {{ 'active' if u.is_active else 'cancelled' }}">{{ 'Активний' if u.is_active else 'Заблокований' }}</span></td>
+    <td>{% if u.id != current_user.id %}
+      <form class="inline" method="post" action="{{ url_for('moderator.toggle_active', user_id=u.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn secondary sm">{{ 'Заблокувати' if u.is_active else 'Розблокувати' }}</button>
+      </form>{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table></div>
+{% endblock %}

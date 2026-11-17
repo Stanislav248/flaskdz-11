@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Редагування заходу' if event else 'Новий захід' }}{% endblock %}
+{% block content %}
+<div class="card form-wide">
+  <h1>{{ 'Редагування заходу' if event else 'Новий захід' }}</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Назва</label><input name="title" value="{{ form.get('title','') }}" required>
+    <label>Опис</label><textarea name="description">{{ form.get('description','') }}</textarea>
+    <div class="row">
+      <div><label>Місце</label><input name="location" value="{{ form.get('location','') }}"></div>
+      <div><label>Категорія</label>
+        <select name="category_id"><option value="">— без категорії —</option>
+          {% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if form.get('category_id')|string == c.id|string }}>{{ c.name }}</option>{% endfor %}
+        </select></div>
+    </div>
+    <div class="row">
+      <div><label>Початок</label><input type="datetime-local" name="start_time" value="{{ form.get('start_time','') }}" required></div>
+      <div><label>Завершення</label><input type="datetime-local" name="end_time" value="{{ form.get('end_time','') }}" required></div>
+    </div>
+    <div class="row">
+      <div><label>Ціна, грн (0 - безкоштовно)</label><input type="number" name="price" min="0" step="any" value="{{ form.get('price','0') }}"></div>
+      <div><label>Кількість місць</label><input type="number" name="capacity" min="1" value="{{ form.get('capacity','') }}" required></div>
+    </div>
+    <p class="actions" style="margin-top:20px">
+      {% if event and event.status == 'cancelled' %}
+        <button class="btn" name="action" value="save">Зберегти</button>
+      {% else %}
+        <button class="btn secondary" name="action" value="draft">Зберегти як чернетку</button>
+        <button class="btn" name="action" value="publish">Опублікувати</button>
+      {% endif %}
+      <a class="btn secondary" href="{{ url_for('manage.my_events') }}">Назад</a>
+    </p>
+  </form>
+</div>
+{% endblock %}
